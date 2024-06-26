@@ -1,11 +1,20 @@
 import express from "express";
 import { InfisicalClient } from "@infisical/sdk";
 
+const PORT = process.env.PORT || 3001;
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-const PORT = process.env.PORT || 3000;
+// enable CORS for all routes and for our specific API-Key header
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, API-Key"
+  );
+  next();
+});
 
 const client = new InfisicalClient({
   siteUrl: "https://app.infisical.com", // Optional, defaults to https://app.infisical.com
@@ -21,26 +30,92 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.post("/secret", async (req, res) => {
-  // get secret name from body
-  const apiKey = req.body["x-api-key"];
-  if (apiKey !== process.env.API_KEY) {
-    res.status(401).send({ message: "Unauthorized" });
-    return;
+// PROTECT ALL ROUTES THAT FOLLOW
+app.use((req, res, next) => {
+  const apiKey = req.get("x-api-key");
+  if (!apiKey || apiKey !== process.env.API_KEY) {
+    res.status(401).json({ error: "Unauthorized" });
+  } else {
+    next();
   }
+});
 
-  const secretName = req.body.secretName;
+app.get("/secret/:secretName", async (req, res) => {
+  const secretName = req.params.secretName;
 
   // Access the secret
-  const name = await client.getSecret({
-    environment: "prod",
-    projectId: process.env.INFISICAL_PROJECT_ID || "",
-    path: "/",
-    type: "shared",
-    secretName: secretName || "",
-  });
+  try {
+    const secret = await client.getSecret({
+      environment: "prod",
+      projectId: process.env.INFISICAL_PROJECT_ID || "",
+      path: "/",
+      type: "shared",
+      secretName: secretName || "",
+    });
 
-  res.send({ secret: name.secretValue });
+    res.send({ secretValue: secret.secretValue });
+  } catch (error) {
+    res.send({ error: error.message });
+  }
+});
+
+app.post("/secret", async (req, res) => {
+  const { secretName, secretValue } = req.body;
+
+  try {
+    // Create a secret
+    const newSecret = await client.createSecret({
+      projectId: process.env.INFISICAL_PROJECT_ID || "",
+      environment: "prod",
+      secretName: secretName,
+      secretValue: secretValue,
+      path: "/",
+      type: "shared",
+    });
+
+    res.send({ secretKey: newSecret.secretKey });
+  } catch (error) {
+    res.send({ error: error.message });
+  }
+});
+
+app.put("/secret", async (req, res) => {
+  const { secretName, secretValue } = req.body;
+
+  try {
+    // Update a secret
+    const updatedSecret = await client.updateSecret({
+      projectId: process.env.INFISICAL_PROJECT_ID || "",
+      environment: "prod",
+      secretName: secretName,
+      secretValue: secretValue,
+      path: "/",
+      type: "shared",
+    });
+
+    res.send({ secretKey: updatedSecret.secretKey });
+  } catch (error) {
+    res.send({ error: error.message });
+  }
+});
+
+app.delete("/secret", async (req, res) => {
+  const { secretName } = req.body;
+
+  try {
+    // Delete a secret
+    const deletedSecret = await client.deleteSecret({
+      secretName: secretName,
+      environment: "prod",
+      projectId: process.env.INFISICAL_PROJECT_ID || "",
+      path: "/",
+      type: "shared",
+    });
+
+    res.send({ secretKey: deletedSecret.secretKey });
+  } catch (error) {
+    res.send({ error: error.message });
+  }
 });
 
 app.listen(PORT, async () => {
