@@ -5,7 +5,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const client = new InfisicalClient({
   siteUrl: "https://app.infisical.com", // Optional, defaults to https://app.infisical.com
