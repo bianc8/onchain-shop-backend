@@ -2,21 +2,23 @@
   "name": "onchain-shop-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "type": "module",
+  "main": "index.ts",
   "scripts": {
-    "dev": "nodemon -r dotenv/config index.js",
-    "start": "node -r dotenv/config index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon -r dotenv/config index.ts",
+    "start": "ts-node -r dotenv/config index.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@infisical/sdk": "^2.2.3",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "tsc": "^2.0.4"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "@types/express": "^4.17.21",
+    "nodemon": "^3.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.2"
   }
 }

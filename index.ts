@@ -55,7 +55,8 @@ app.get("/secret/:secretName", async (req, res) => {
 
     res.send({ secretValue: secret.secretValue });
   } catch (error) {
-    res.send({ error: error.message });
+    const errorMessage = (error as Error).message || "An error occurred";
+    res.send({ error: errorMessage });
   }
 });
 
@@ -73,9 +74,10 @@ app.post("/secret", async (req, res) => {
       type: "shared",
     });
 
-    res.send({ secretKey: newSecret.secretKey });
+    res.send({ secretName: newSecret.secretName });
   } catch (error) {
-    res.send({ error: error.message });
+    const errorMessage = (error as Error).message || "An error occurred";
+    res.send({ error: errorMessage });
   }
 });
 
@@ -93,9 +95,10 @@ app.put("/secret", async (req, res) => {
       type: "shared",
     });
 
-    res.send({ secretKey: updatedSecret.secretKey });
+    res.send({ secretName: updatedSecret.secretName });
   } catch (error) {
-    res.send({ error: error.message });
+    const errorMessage = (error as Error).message || "An error occurred";
+    res.send({ error: errorMessage });
   }
 });
 
@@ -112,9 +115,10 @@ app.delete("/secret", async (req, res) => {
       type: "shared",
     });
 
-    res.send({ secretKey: deletedSecret.secretKey });
+    res.send({ secretName: deletedSecret.secretName });
   } catch (error) {
-    res.send({ error: error.message });
+    const errorMessage = (error as Error).message || "An error occurred";
+    res.send({ error: errorMessage });
   }
 });
 
