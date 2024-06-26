@@ -17,6 +17,10 @@ const client = new InfisicalClient({
   },
 });
 
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
 app.post("/secret", async (req, res) => {
   // get secret name from body
   const apiKey = req.body["x-api-key"];
